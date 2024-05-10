@@ -5,6 +5,9 @@ import * as dat from 'lil-gui'
 import { AmbientLight, DirectionalLight } from 'three'
 import vertex from './src/shaders/vertex.glsl'
 import fragment from './src/shaders/fragment.glsl'
+import Balrog from '/balcopia.glb?url'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js'
 /**
  * Debug
  */
@@ -14,6 +17,11 @@ import fragment from './src/shaders/fragment.glsl'
  * Scene
  */
 const scene = new THREE.Scene()
+const loader = new GLTFLoader()
+loader.load(Balrog, (gltf) => {
+	const model = gltf.scene
+	scene.add(model)
+})
 // scene.background = new THREE.Color(0xdedede)
 
 /**
@@ -85,8 +93,8 @@ camera.lookAt(new THREE.Vector3(0, 2.5, 0))
 /**
  * Show the axes of coordinates system
  */
-// const axesHelper = new THREE.AxesHelper(3)
-// scene.add(axesHelper)
+const axesHelper = new THREE.AxesHelper(3)
+scene.add(axesHelper)
 
 /**
  * renderer
