@@ -53,10 +53,16 @@ loader.load(Balrog, (gltf) => {
 // const mesh = new THREE.Mesh(geometry, material)
 // mesh.position.y += 0.5
 // scene.add(mesh)
+
+const colors = [
+	new THREE.Color('red'),
+	new THREE.Color('orange'),
+	new THREE.Color('grey'),
+]
 function createParticles(sampler) {
 	const geometry = new THREE.BufferGeometry()
-	const num = 5000
-	const bound = 40
+	const num = 10000
+	const bound = 10
 
 	const positionArray = new Float32Array(num * 3)
 	const colorArray = new Float32Array(num * 3)
@@ -71,9 +77,11 @@ function createParticles(sampler) {
 		sampler.sample(pos)
 		const [x, y, z] = pos
 
-		const r = Math.random()
-		const g = Math.random()
-		const b = Math.random()
+		// const r = Math.random()
+		// const g = Math.random()
+		// const b = Math.random()
+		const color = colors[Math.floor(Math.random() * colors.length)]
+		const [r, g, b] = color
 
 		positionArray.set([x, y, z], i * 3)
 		colorArray.set([r, g, b], i * 3)
@@ -87,6 +95,8 @@ function createParticles(sampler) {
 		fragmentShader: fragment,
 		vertexShader: vertex,
 		transparent: true,
+		depthWrite: false,
+		blending: THREE.AdditiveBlending,
 	})
 
 	const particles = new THREE.Points(geometry, material)
