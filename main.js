@@ -68,7 +68,7 @@ const uniforms = {
 function createParticles(sampler) {
 	const geometry = new THREE.BufferGeometry()
 	const num = 10000
-	const bound = 10
+	// const bound = 1
 
 	const positionArray = new Float32Array(num * 3)
 	const colorArray = new Float32Array(num * 3)
