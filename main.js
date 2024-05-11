@@ -65,6 +65,7 @@ loader.load(Travis, (gltf) => {
 	console.log(model)
 	// scene.add(model)
 	model.geometry.scale(1.5, 1.5, 1.5)
+	model.geometry.rotateY(-0.3)
 	// scene.add(model)
 	models.travis = model
 	// const sampler = new MeshSurfaceSampler(model).build()
@@ -196,7 +197,7 @@ const sizes = {
  */
 const fov = 60
 const camera = new THREE.PerspectiveCamera(fov, sizes.width / sizes.height, 0.1)
-camera.position.set(4, -1, -2)
+camera.position.set(4, -1, -1.5)
 camera.lookAt(new THREE.Vector3(0, 0, 0))
 
 /**
