@@ -8,6 +8,7 @@ import fragment from './src/shaders/fragment.glsl'
 import Balrog from '/balcopia.glb?url'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js'
+import { Vector3 } from 'three'
 /**
  * Debug
  */
@@ -19,8 +20,17 @@ import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.j
 const scene = new THREE.Scene()
 const loader = new GLTFLoader()
 loader.load(Balrog, (gltf) => {
-	const model = gltf.scene
-	scene.add(model)
+	let model
+	gltf.scene.traverse((el) => {
+		if (el instanceof THREE.Mesh) {
+			model = el
+		}
+	})
+	console.log(model)
+	// scene.add(model)
+	model.geometry.scale(3, 3, 3)
+	const sampler = new MeshSurfaceSampler(model).build()
+	createParticles(sampler)
 })
 // scene.background = new THREE.Color(0xdedede)
 
@@ -43,38 +53,45 @@ loader.load(Balrog, (gltf) => {
 // const mesh = new THREE.Mesh(geometry, material)
 // mesh.position.y += 0.5
 // scene.add(mesh)
-const geometry = new THREE.BufferGeometry()
-const num = 500
-const bound = 20
+function createParticles(sampler) {
+	const geometry = new THREE.BufferGeometry()
+	const num = 5000
+	const bound = 40
 
-const positionArray = new Float32Array(num * 3)
-const colorArray = new Float32Array(num * 3)
+	const positionArray = new Float32Array(num * 3)
+	const colorArray = new Float32Array(num * 3)
 
-for (let i = 0; i < num; i++) {
-	const x = Math.random() * bound - bound / 2
-	const y = Math.random() * bound - bound / 2
-	const z = Math.random() * bound - bound / 2
+	const pos = new THREE.Vector3()
 
-	const r = Math.random()
-	const g = Math.random()
-	const b = Math.random()
+	for (let i = 0; i < num; i++) {
+		// const x = Math.random() * bound - bound / 2
+		// const y = Math.random() * bound - bound / 2
+		// const z = Math.random() * bound - bound / 2
 
-	positionArray.set([x, y, z], i * 3)
-	colorArray.set([r, g, b], i * 3)
+		sampler.sample(pos)
+		const [x, y, z] = pos
+
+		const r = Math.random()
+		const g = Math.random()
+		const b = Math.random()
+
+		positionArray.set([x, y, z], i * 3)
+		colorArray.set([r, g, b], i * 3)
+	}
+
+	console.log([positionArray])
+	geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3))
+	geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3))
+
+	const material = new THREE.ShaderMaterial({
+		fragmentShader: fragment,
+		vertexShader: vertex,
+		transparent: true,
+	})
+
+	const particles = new THREE.Points(geometry, material)
+	scene.add(particles)
 }
-
-console.log([positionArray])
-geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3))
-geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3))
-
-const material = new THREE.ShaderMaterial({
-	fragmentShader: fragment,
-	vertexShader: vertex,
-	transparent: true,
-})
-
-const particles = new THREE.Points(geometry, material)
-scene.add(particles)
 /**
  * render sizes
  */
