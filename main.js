@@ -59,6 +59,12 @@ const colors = [
 	new THREE.Color('orange'),
 	new THREE.Color('grey'),
 ]
+
+
+const uniforms = {
+	uTime: { value: 0 },
+}
+
 function createParticles(sampler) {
 	const geometry = new THREE.BufferGeometry()
 	const num = 10000
@@ -66,6 +72,7 @@ function createParticles(sampler) {
 
 	const positionArray = new Float32Array(num * 3)
 	const colorArray = new Float32Array(num * 3)
+	const offsetArray = new Float32Array(num)
 
 	const pos = new THREE.Vector3()
 
@@ -83,6 +90,9 @@ function createParticles(sampler) {
 		const color = colors[Math.floor(Math.random() * colors.length)]
 		const [r, g, b] = color
 
+		const offset = Math.random()
+		offsetArray[i] = offset
+
 		positionArray.set([x, y, z], i * 3)
 		colorArray.set([r, g, b], i * 3)
 	}
@@ -90,8 +100,12 @@ function createParticles(sampler) {
 	console.log([positionArray])
 	geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3))
 	geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3))
+	geometry.setAttribute('offset', new THREE.BufferAttribute(offsetArray, 1))
 
 	const material = new THREE.ShaderMaterial({
+		uniforms: {
+			...uniforms,
+		},
 		fragmentShader: fragment,
 		vertexShader: vertex,
 		transparent: true,
@@ -150,7 +164,7 @@ scene.add(ambientLight, directionalLight)
 /**
  * Three js Clock
  */
-// const clock = new THREE.Clock()
+const clock = new THREE.Clock()
 
 /**
  * frame loop
@@ -163,7 +177,8 @@ function tic() {
 	/**
 	 * tempo totale trascorso dall'inizio
 	 */
-	// const time = clock.getElapsedTime()
+	const time = clock.getElapsedTime()
+	uniforms.uTime.value = time
 
 	controls.update()
 
