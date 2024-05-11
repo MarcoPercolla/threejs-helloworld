@@ -6,9 +6,32 @@ import { AmbientLight, DirectionalLight } from 'three'
 import vertex from './src/shaders/vertex.glsl'
 import fragment from './src/shaders/fragment.glsl'
 import Balrog from '/balcopia.glb?url'
+import Travis from '/travislow.glb?url'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js'
-import { Vector3 } from 'three'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+
+const uniforms = {
+	uTime: { value: 0 },
+	uProgress: { value: 0 },
+}
+
+
+gsap.to(uniforms.uProgress, {
+	value: 1,
+	duration: 2,
+	ease: 'linear',
+	scrollTrigger: {
+		trigger: '#app',
+		start: 'top top',
+		end: 'bottom bottom',
+		scrub: 2,
+	},
+})
 /**
  * Debug
  */
@@ -18,7 +41,37 @@ import { Vector3 } from 'three'
  * Scene
  */
 const scene = new THREE.Scene()
-const loader = new GLTFLoader()
+
+const manager = new THREE.LoadingManager()
+
+const loader = new GLTFLoader(manager)
+
+const models = {
+	balrog: null,
+	travis: null,
+}
+
+manager.onLoad = () => {
+	createParticles(models)
+}
+
+loader.load(Travis, (gltf) => {
+	let model
+	gltf.scene.traverse((el) => {
+		if (el instanceof THREE.Mesh) {
+			model = el
+		}
+	})
+	console.log(model)
+	// scene.add(model)
+	model.geometry.scale(1.5, 1.5, 1.5)
+	// scene.add(model)
+	models.travis = model
+	// const sampler = new MeshSurfaceSampler(model).build()
+	// createParticles(sampler)
+})
+
+
 loader.load(Balrog, (gltf) => {
 	let model
 	gltf.scene.traverse((el) => {
@@ -28,9 +81,10 @@ loader.load(Balrog, (gltf) => {
 	})
 	console.log(model)
 	// scene.add(model)
-	model.geometry.scale(3, 3, 3)
-	const sampler = new MeshSurfaceSampler(model).build()
-	createParticles(sampler)
+	model.geometry.scale(2.5, 2.5, 2.5)
+	// const sampler = new MeshSurfaceSampler(model).build()
+	// createParticles(sampler)
+	models.balrog = model
 })
 // scene.background = new THREE.Color(0xdedede)
 
@@ -58,19 +112,24 @@ const colors = [
 	new THREE.Color('red'),
 	new THREE.Color('orange'),
 	new THREE.Color('grey'),
+	new THREE.Color('silver'),
+	new THREE.Color('orangered'),
+	new THREE.Color('#FF0000'),
+	new THREE.Color('white'),
+	new THREE.Color('#FF0010'),
 ]
 
 
-const uniforms = {
-	uTime: { value: 0 },
-}
 
-function createParticles(sampler) {
+function createParticles({ balrog, travis }) {
+	const balrogSampler = new MeshSurfaceSampler(balrog).build()
+	const travisSampler = new MeshSurfaceSampler(travis).build()
 	const geometry = new THREE.BufferGeometry()
-	const num = 10000
+	const num = 30000
 	// const bound = 1
 
 	const positionArray = new Float32Array(num * 3)
+	const position2Array = new Float32Array(num * 3)
 	const colorArray = new Float32Array(num * 3)
 	const offsetArray = new Float32Array(num)
 
@@ -81,8 +140,13 @@ function createParticles(sampler) {
 		// const y = Math.random() * bound - bound / 2
 		// const z = Math.random() * bound - bound / 2
 
-		sampler.sample(pos)
+		balrogSampler.sample(pos)
 		const [x, y, z] = pos
+		positionArray.set([x, y, z], i * 3)
+
+		travisSampler.sample(pos)
+		const [x2, y2, z2] = pos
+		position2Array.set([x2, y2, z2], i * 3)
 
 		// const r = Math.random()
 		// const g = Math.random()
@@ -93,12 +157,16 @@ function createParticles(sampler) {
 		const offset = Math.random()
 		offsetArray[i] = offset
 
-		positionArray.set([x, y, z], i * 3)
+
 		colorArray.set([r, g, b], i * 3)
 	}
 
 	console.log([positionArray])
 	geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3))
+	geometry.setAttribute(
+		'position2',
+		new THREE.BufferAttribute(position2Array, 3)
+	)
 	geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3))
 	geometry.setAttribute('offset', new THREE.BufferAttribute(offsetArray, 1))
 
@@ -128,8 +196,8 @@ const sizes = {
  */
 const fov = 60
 const camera = new THREE.PerspectiveCamera(fov, sizes.width / sizes.height, 0.1)
-camera.position.set(4, 4, 4)
-camera.lookAt(new THREE.Vector3(0, 2.5, 0))
+camera.position.set(4, -1, -2)
+camera.lookAt(new THREE.Vector3(0, 0, 0))
 
 /**
  * Show the axes of coordinates system
