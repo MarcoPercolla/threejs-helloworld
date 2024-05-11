@@ -83,6 +83,8 @@ loader.load(Balrog, (gltf) => {
 	console.log(model)
 	// scene.add(model)
 	model.geometry.scale(2.5, 2.5, 2.5)
+	model.geometry.rotateY(0.8)
+
 	// const sampler = new MeshSurfaceSampler(model).build()
 	// createParticles(sampler)
 	models.balrog = model
@@ -203,8 +205,8 @@ camera.lookAt(new THREE.Vector3(0, 0, 0))
 /**
  * Show the axes of coordinates system
  */
-const axesHelper = new THREE.AxesHelper(3)
-scene.add(axesHelper)
+// const axesHelper = new THREE.AxesHelper(3)
+// scene.add(axesHelper)
 
 /**
  * renderer

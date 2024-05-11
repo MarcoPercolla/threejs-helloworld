@@ -17,8 +17,8 @@ void main() {
   vec3 wPos = vec4( modelMatrix * vec4(pos, 1.0) ).xyz;
   float dist = distance(cameraPosition, wPos);
 
-  vDistance = smoothstep(13.,2.6, dist);
+  vDistance = smoothstep(12.,1.5, dist);
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.3);
-  gl_PointSize = 80. * vDistance * (sin(uTime * 4. + offset * 30.)*0.4 +0.2);
+  gl_PointSize = 100. * vDistance * (sin(uTime * 4. + offset * 30.)*0.2 +0.3);
 }
